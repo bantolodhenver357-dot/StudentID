@@ -1,0 +1,6 @@
+function saveCanvas(canvas,name){canvas.toBlob(blob=>{if(blob)IDApp.downloadBlob(blob,name);},"image/png");}
+document.getElementById("exportPngBtn").onclick=()=>{const side=IDCardEditor.state.side;saveCanvas(IDCardEditor.imageData(side),"school-id-"+side+".png");};
+function printCanvases(canvases){document.querySelectorAll(".print-sheet").forEach(x=>x.remove());const sheet=document.createElement("div");sheet.className="print-sheet";canvases.forEach(c=>{const copy=document.createElement("canvas");copy.width=c.width;copy.height=c.height;copy.getContext("2d").drawImage(c,0,0);sheet.append(copy);});document.body.append(sheet);window.print();setTimeout(()=>sheet.remove(),1000);}
+document.getElementById("printBtn").onclick=()=>printCanvases([IDCardEditor.imageData("front"),IDCardEditor.imageData("back")]);
+document.getElementById("previewPrintBtn").onclick=()=>{document.getElementById("previewModal").classList.add("hidden");printCanvases([IDCardEditor.imageData("front"),IDCardEditor.imageData("back")]);};
+window.addEventListener("beforeunload",()=>IDCardEditor.persist());

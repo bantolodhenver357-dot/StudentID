@@ -1,0 +1,12 @@
+{
+  "name": "School ID Maker",
+  "short_name": "ID Maker",
+  "description": "Create and customize school identification cards.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f6fb",
+  "theme_color": "#142b4d",
+  "icons": []
+}
