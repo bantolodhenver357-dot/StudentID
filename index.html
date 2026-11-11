@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,155 +7,548 @@
   <meta name="theme-color" content="#142b4d">
   <meta name="description" content="Create, customize, and export school ID cards.">
   <title>School ID Maker</title>
+
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 </head>
+
 <body>
   <div class="app-shell">
+
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-mark">ID</div>
-        <div><strong>School ID Maker</strong><small>Card design studio</small></div>
+        <div>
+          <strong>School ID Maker</strong>
+          <small>Card design studio</small>
+        </div>
       </div>
+
       <nav class="nav">
-        <button class="nav-item active" data-view="designer"><span>✦</span> ID Designer</button>
-        <button class="nav-item" data-view="templates"><span>▧</span> Templates</button>
-        <button class="nav-item" data-view="records"><span>▤</span> Student Records</button>
+        <button class="nav-item active" data-view="designer">
+          <span>✦</span> ID Designer
+        </button>
+
+        <button class="nav-item" data-view="templates">
+          <span>▧</span> Templates
+        </button>
+
+        <button class="nav-item" data-view="records">
+          <span>▤</span> Student Records
+        </button>
       </nav>
+
       <div class="sidebar-note">
         <strong>Work safely</strong>
         <p>Your designs and student records are saved in this browser. Export backups regularly.</p>
       </div>
-      <div class="sidebar-bottom"><span class="status-dot"></span> Local workspace</div>
+
+      <div class="sidebar-bottom">
+        <span class="status-dot"></span> Local workspace
+      </div>
     </aside>
 
+    <!-- MAIN -->
     <main class="main">
+
+      <!-- TOPBAR -->
       <header class="topbar">
         <button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
-        <div><p class="eyebrow">SCHOOL ID STUDIO</p><h1 id="pageTitle">ID Designer</h1></div>
+
+        <div>
+          <p class="eyebrow">SCHOOL ID STUDIO</p>
+          <h1 id="pageTitle">ID Designer</h1>
+        </div>
+
         <div class="top-actions">
-          <button class="btn btn-quiet" id="backupBtn">Export backup</button>
-          <button class="btn btn-primary" id="newStudentBtn">＋ New student ID</button>
+          <button class="btn btn-quiet" id="backupBtn">
+            Export backup
+          </button>
+
+          <button class="btn btn-primary" id="newStudentBtn">
+            ＋ New student ID
+          </button>
         </div>
       </header>
 
+      <!-- ================= DESIGNER ================= -->
+
       <section class="view active" id="designerView">
+
         <div class="intro-row">
-          <div><h2>Design your student ID</h2><p>Upload a school template, add student details, then position each layer on the card.</p></div>
-          <div class="autosave"><span class="status-dot"></span> Auto-save enabled</div>
+          <div>
+            <h2>Design your student ID</h2>
+            <p>Upload a school template, add student details, then position each layer on the card.</p>
+          </div>
+
+          <div class="autosave">
+            <span class="status-dot"></span> Auto-save enabled
+          </div>
         </div>
 
         <div class="workspace">
+
+          <!-- STUDENT INFORMATION -->
           <section class="panel form-panel">
-            <div class="panel-heading"><div><h3>Student information</h3><p>Details printed on the card</p></div></div>
-            <form id="studentForm">
-              <label>Full name<input id="studentName" placeholder="e.g. SABER D. GUIMBA"></label>
-              <div class="two-col">
-                <label>Course / Program<input id="course" placeholder="e.g. BS CRIMINOLOGY"></label>
-                <label>Student ID number<input id="studentNumber" placeholder="e.g. 50143"></label>
+
+            <div class="panel-heading">
+              <div>
+                <h3>Student information</h3>
+                <p>Details printed on the card</p>
               </div>
-              <div class="two-col">
-                <label>School year<input id="schoolYear" placeholder="e.g. 2023-2024"></label>
-                <label>Birthdate<input id="birthdate" placeholder="e.g. 11/6/2002"></label>
-              </div>
-              <label>Contact number<input id="contact" placeholder="09XXXXXXXXX" inputmode="tel"></label>
-              <label>Address<textarea id="address" rows="2" placeholder="Barangay, Municipality, Province"></textarea></label>
-              <label>Emergency contact<input id="emergency" placeholder="Name / contact number"></label>
-              <label>Signature image <input id="signatureUpload" type="file" accept="image/*"></label>
-              <div class="form-actions">
-                <button class="btn btn-primary" type="button" id="applyInfoBtn">Apply details to ID</button>
-                <button class="btn btn-quiet" type="reset" id="clearFormBtn">Clear form</button>
-              </div>
-            </form>
-            <div class="divider"></div>
-            <div class="panel-heading compact"><div><h3>Student photo</h3><p>Upload, crop, and position the photo</p></div></div>
-            <label class="upload-box" for="photoUpload"><span class="upload-icon">＋</span><strong>Choose student photo</strong><small>JPG, PNG or WEBP</small></label>
-            <input class="hidden" id="photoUpload" type="file" accept="image/*">
-            <div id="photoTools" class="photo-tools hidden">
-              <label>Zoom <input type="range" id="photoZoom" min="0.5" max="3" step="0.05" value="1"></label>
-              <div class="button-row"><button class="btn btn-quiet" id="rotatePhotoBtn" type="button">↻ Rotate</button><button class="btn btn-quiet" id="resetPhotoBtn" type="button">Reset crop</button></div>
-              <p class="hint">Drag the photo inside the card to adjust its position. Use the zoom slider to resize it.</p>
             </div>
+
+            <form id="studentForm">
+
+              <label>
+                Full name
+                <input id="studentName" placeholder="e.g. SABER D. GUIMBA">
+              </label>
+
+              <div class="two-col">
+                <label>
+                  Course / Program
+                  <input id="course" placeholder="e.g. BS CRIMINOLOGY">
+                </label>
+
+                <label>
+                  Student ID number
+                  <input id="studentNumber" placeholder="e.g. 50143">
+                </label>
+              </div>
+
+              <div class="two-col">
+                <label>
+                  School year
+                  <input id="schoolYear" placeholder="e.g. 2026-2027">
+                </label>
+
+                <label>
+                  Birthdate
+                  <input id="birthdate" placeholder="e.g. 11/6/2002">
+                </label>
+              </div>
+
+              <label>
+                Contact number
+                <input id="contact" placeholder="09XXXXXXXXX" inputmode="tel">
+              </label>
+
+              <label>
+                Address
+                <textarea id="address" rows="2" placeholder="Barangay, Municipality, Province"></textarea>
+              </label>
+
+              <label>
+                Emergency contact
+                <input id="emergency" placeholder="Name / contact number">
+              </label>
+
+              <label>
+                Signature image
+                <input type="file" id="signatureUpload" accept="image/*">
+              </label>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" type="button" id="applyInfoBtn">
+                  Apply details to ID
+                </button>
+
+                <button class="btn btn-quiet" type="reset" id="clearFormBtn">
+                  Clear form
+                </button>
+              </div>
+
+            </form>
+
+            <div class="divider"></div>
+
+            <!-- PHOTO -->
+            <div class="panel-heading compact">
+              <div>
+                <h3>Student photo</h3>
+                <p>Upload, crop, and position the photo</p>
+              </div>
+            </div>
+
+            <label class="upload-box" for="photoUpload">
+              <span class="upload-icon">＋</span>
+              <strong>Choose student photo</strong>
+              <small>JPG, PNG or WEBP</small>
+            </label>
+
+            <input class="hidden" id="photoUpload" type="file" accept="image/*">
+
+            <div id="photoTools" class="photo-tools hidden">
+              <label>
+                Zoom
+                <input type="range" id="photoZoom" min="0.5" max="3" step="0.05" value="1">
+              </label>
+
+              <div class="button-row">
+                <button class="btn btn-quiet" id="rotatePhotoBtn" type="button">
+                  ↻ Rotate
+                </button>
+
+                <button class="btn btn-quiet" id="resetPhotoBtn" type="button">
+                  Reset crop
+                </button>
+              </div>
+
+              <p class="hint">
+                Drag the photo inside the card to adjust its position. Use the zoom slider to resize it.
+              </p>
+            </div>
+
           </section>
 
+          <!-- ID CANVAS -->
           <section class="panel canvas-panel">
+
             <div class="canvas-toolbar">
               <div class="segmented">
-                <button class="segment active" data-side="front">Front side</button>
-                <button class="segment" data-side="back">Back side</button>
+                <button class="segment active" data-side="front">
+                  Front side
+                </button>
+
+                <button class="segment" data-side="back">
+                  Back side
+                </button>
               </div>
+
               <div class="toolbar-actions">
-                <button class="icon-btn" id="zoomOut" title="Zoom out">−</button><span id="zoomLabel">100%</span><button class="icon-btn" id="zoomIn" title="Zoom in">＋</button>
+                <button class="icon-btn" id="zoomOut" title="Zoom out">−</button>
+                <span id="zoomLabel">100%</span>
+                <button class="icon-btn" id="zoomIn" title="Zoom in">＋</button>
                 <button class="btn btn-quiet" id="fitCanvas">Fit</button>
               </div>
             </div>
+
             <div class="canvas-stage" id="canvasStage">
               <div class="card-wrap" id="cardWrap">
                 <canvas id="idCanvas" width="636" height="1012" aria-label="School ID design canvas"></canvas>
               </div>
             </div>
-            <div class="canvas-footer"><span>Tip: Select an item to move it. Drag corner handles to resize.</span><span id="canvasDimensions">636 × 1012 px</span></div>
+
+            <div class="canvas-footer">
+              <span>Tip: Select an item to move it. Drag corner handles to resize.</span>
+              <span id="canvasDimensions">636 × 1012 px</span>
+            </div>
+
           </section>
 
+          <!-- PROPERTIES AND LAYERS -->
           <section class="panel properties-panel">
-            <div class="panel-heading"><div><h3>Selected element</h3><p>Position and appearance</p></div></div>
-            <div id="noSelection" class="empty-state">Select a text, photo, or signature layer on the card to edit its settings.</div>
-            <div id="properties" class="hidden">
-              <div class="selected-name" id="selectedName">Element</div>
-              <div class="two-col">
-                <label>X position<input type="number" id="propX"></label>
-                <label>Y position<input type="number" id="propY"></label>
+
+            <div class="panel-heading">
+              <div>
+                <h3>Selected element</h3>
+                <p>Position and appearance</p>
               </div>
-              <div class="two-col">
-                <label>Width<input type="number" id="propW" min="10"></label>
-                <label>Height<input type="number" id="propH" min="10"></label>
-              </div>
-              <label id="fontSizeRow">Font size<input type="number" id="propFont" min="6" max="150"></label>
-              <label id="colorRow">Text color<input type="color" id="propColor" value="#111111"></label>
-              <label id="alignRow">Text alignment<select id="propAlign"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label>
-              <label>Layer name<input id="propLabel"></label>
-            
-              <div class="button-row vertical-gap"><button class="btn btn-quiet" id="lockLayer">🔒 Lock position</button><button class="btn btn-danger-quiet" id="deleteLayer">Delete layer</button></div>
             </div>
+
+            <div id="noSelection" class="empty-state">
+              Select a text, photo, or signature layer on the card to edit its settings.
+            </div>
+
+            <div id="properties" class="hidden">
+
+              <div class="selected-name" id="selectedName">Element</div>
+
+              <div class="two-col">
+                <label>
+                  X position
+                  <input type="number" id="propX">
+                </label>
+
+                <label>
+                  Y position
+                  <input type="number" id="propY">
+                </label>
+              </div>
+
+              <div class="two-col">
+                <label>
+                  Width
+                  <input type="number" id="propW" min="10">
+                </label>
+
+                <label>
+                  Height
+                  <input type="number" id="propH" min="10">
+                </label>
+              </div>
+
+              <label id="fontSizeRow">
+                Font size
+                <input type="number" id="propFont" min="6" max="150">
+              </label>
+
+              <label id="colorRow">
+                Text color
+                <input type="color" id="propColor" value="#111111">
+              </label>
+
+              <label id="alignRow">
+                Text alignment
+                <select id="propAlign">
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="right">Right</option>
+                </select>
+              </label>
+
+              <label>
+                Layer name
+                <input id="propLabel">
+              </label>
+
+              <div class="button-row vertical-gap">
+                <button class="btn btn-quiet" id="lockLayer">
+                  🔒 Lock position
+                </button>
+
+                <button class="btn btn-danger-quiet" id="deleteLayer">
+                  Delete layer
+                </button>
+              </div>
+
+            </div>
+
             <div class="divider"></div>
-            <div class="panel-heading compact"><div><h3>Layers</h3><p>Choose and lock elements</p></div></div>
-            
+
+            <div class="panel-heading compact">
+              <div>
+                <h3>Layers</h3>
+                <p>Choose, hide, and lock elements</p>
+              </div>
+            </div>
+
             <div id="layerList" class="layer-list"></div>
-            
-            <button class="btn btn-quiet full-width" id="addTextBtn">＋ Add text layer</button>
-            <button class="btn btn-quiet full-width" id="addPhotoFrameBtn">＋ Add photo layer</button>
+
+            <button class="btn btn-quiet full-width" id="addTextBtn">
+              ＋ Add text layer
+            </button>
+
+            <button class="btn btn-quiet full-width" id="addPhotoFrameBtn">
+              ＋ Add photo layer
+            </button>
+
           </section>
         </div>
+
+        <!-- DESIGNER ACTIONS -->
         <div class="bottom-actions">
-          <button class="btn btn-quiet" id="previewBtn">Preview front & back</button>
-          <div><button class="btn btn-quiet" id="saveRecordBtn">Save student record</button><button class="btn btn-primary" id="exportPngBtn">Download current side PNG ↓</button><button class="btn btn-primary" id="printBtn">Print / Save PDF</button></div>
+          <button class="btn btn-quiet" id="previewBtn">
+            Preview front & back
+          </button>
+
+          <div>
+            <button class="btn btn-quiet" id="saveRecordBtn">
+              Save student record
+            </button>
+
+            <button class="btn btn-primary" id="exportPngBtn">
+              Download current side PNG ↓
+            </button>
+
+            <button class="btn btn-primary" id="printBtn">
+              Print / Save PDF
+            </button>
+          </div>
         </div>
+
       </section>
+
+      <!-- ================= TEMPLATE LIBRARY ================= -->
 
       <section class="view" id="templatesView">
-        <div class="intro-row"><div><h2>Your ID templates</h2><p>Upload your clean front and back artwork. Each template is kept separate from student information.</p></div></div>
-        <div class="template-grid">
-          <article class="panel template-card"><div class="panel-heading"><div><h3>Front design</h3><p>Portrait or landscape artwork</p></div><span class="template-badge" id="frontTemplateStatus">Not uploaded</span></div><div class="template-preview" id="frontTemplatePreview">Front template preview</div><label class="btn btn-primary file-button">Upload front design<input type="file" id="frontTemplateUpload" accept="image/*"></label></article>
-          <article class="panel template-card"><div class="panel-heading"><div><h3>Back design</h3><p>Validity, contact, and signature artwork</p></div><span class="template-badge" id="backTemplateStatus">Not uploaded</span></div><div class="template-preview" id="backTemplatePreview">Back template preview</div><label class="btn btn-primary file-button">Upload back design<input type="file" id="backTemplateUpload" accept="image/*"></label></article>
+
+        <div class="intro-row">
+          <div>
+            <h2>My ID Templates</h2>
+            <p>Create, save, and reuse complete front and back ID designs.</p>
+          </div>
+
+          <button class="btn btn-primary" id="createTemplateBtn" type="button">
+            ＋ Create New Template
+          </button>
         </div>
-        <div class="panel template-help"><h3>Template tips</h3><ul><li>Use a clean background without a student's personal details or photo.</li><li>For best results, use the same dimensions for front and back.</li><li>Your template is stored in this browser. Export a backup before clearing browser data.</li></ul></div>
+
+        <!-- SAVED TEMPLATES WILL APPEAR HERE -->
+        <div id="templateLibrary" class="template-library">
+
+          <div class="empty-state">
+            No saved templates yet. Click "Create New Template" to get started.
+          </div>
+
+        </div>
+
+        <div class="panel template-help">
+          <h3>About complete templates</h3>
+
+          <ul>
+            <li>Save both front and back ID artwork.</li>
+            <li>Preserve text positions, fonts, colors, and sizes.</li>
+            <li>Preserve photo frames and layer settings.</li>
+            <li>Student records remain separate from templates.</li>
+            <li>Create and reuse multiple school ID designs.</li>
+          </ul>
+        </div>
+
       </section>
 
+      <!-- ================= STUDENT RECORDS ================= -->
+
       <section class="view" id="recordsView">
-        <div class="intro-row"><div><h2>Student records</h2><p>Saved ID layouts on this device.</p></div><input class="search-input" id="recordSearch" placeholder="Search student name or ID..."></div>
-        <div class="panel records-panel"><div id="recordsList" class="records-list"><div class="empty-state">No student records saved yet.</div></div></div>
+
+        <div class="intro-row">
+          <div>
+            <h2>Student records</h2>
+            <p>Saved ID layouts on this device.</p>
+          </div>
+
+          <input
+            class="search-input"
+            id="recordSearch"
+            placeholder="Search student name or ID..."
+          >
+        </div>
+
+        <div class="panel records-panel">
+          <div id="recordsList" class="records-list">
+            <div class="empty-state">
+              No student records saved yet.
+            </div>
+          </div>
+        </div>
+
       </section>
+
     </main>
   </div>
 
-  <div class="modal-backdrop hidden" id="previewModal">
-    <div class="modal modal-wide"><div class="modal-head"><div><h2>ID preview</h2><p>Review both sides before printing.</p></div><button class="icon-btn close-modal" data-close="previewModal">✕</button></div><div class="preview-pair"><div><h4>Front</h4><canvas id="frontPreviewCanvas" width="636" height="1012"></canvas></div><div><h4>Back</h4><canvas id="backPreviewCanvas" width="636" height="1012"></canvas></div></div><div class="modal-actions"><button class="btn btn-quiet close-modal" data-close="previewModal">Back to editor</button><button class="btn btn-primary" id="previewPrintBtn">Print both sides</button></div></div>
+  <!-- ================= CREATE TEMPLATE MODAL ================= -->
+
+  <div class="modal-backdrop hidden" id="createTemplateModal">
+
+    <div class="modal">
+
+      <div class="modal-head">
+        <div>
+          <h2>Create ID Template</h2>
+          <p>Save your current complete ID design.</p>
+        </div>
+
+        <button
+          class="icon-btn"
+          type="button"
+          data-close="createTemplateModal"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form id="createTemplateForm">
+
+        <label>
+          Template title
+          <input
+            id="templateTitle"
+            type="text"
+            placeholder="e.g. College Student ID"
+            required
+          >
+        </label>
+
+        <div class="template-save-info">
+          <strong>What will be saved?</strong>
+
+          <p>
+            Front and back artwork, text layers, photo frames, fonts,
+            colors, positions, visibility, and lock settings.
+          </p>
+        </div>
+
+        <div class="modal-actions">
+          <button
+            class="btn btn-quiet"
+            type="button"
+            data-close="createTemplateModal"
+          >
+            Cancel
+          </button>
+
+          <button class="btn btn-primary" type="submit">
+            Save Complete Template
+          </button>
+        </div>
+
+      </form>
+
+    </div>
   </div>
+
+  <!-- ================= PREVIEW MODAL ================= -->
+
+  <div class="modal-backdrop hidden" id="previewModal">
+
+    <div class="modal modal-wide">
+
+      <div class="modal-head">
+        <div>
+          <h2>ID preview</h2>
+          <p>Review both sides before printing.</p>
+        </div>
+
+        <button class="icon-btn close-modal" data-close="previewModal">
+          ✕
+        </button>
+      </div>
+
+      <div class="preview-pair">
+
+        <div>
+          <h4>Front</h4>
+          <canvas id="frontPreviewCanvas" width="636" height="1012"></canvas>
+        </div>
+
+        <div>
+          <h4>Back</h4>
+          <canvas id="backPreviewCanvas" width="636" height="1012"></canvas>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-quiet close-modal" data-close="previewModal">
+          Back to editor
+        </button>
+
+        <button class="btn btn-primary" id="previewPrintBtn">
+          Print both sides
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST -->
   <div class="toast" id="toast" role="status"></div>
+
+  <!-- SCRIPTS -->
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script src="./js/supabase.js"></script>
+<script src="./js/auth.js"></script>
+
+
   <script src="./js/database.js"></script>
   <script src="./js/editor.js"></script>
   <script src="./js/app.js"></script>
   <script src="./js/export.js"></script>
+<script src="./js/cloud-sync.js"></script>
 </body>
 </html>
