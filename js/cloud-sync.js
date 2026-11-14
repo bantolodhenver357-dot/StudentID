@@ -200,9 +200,30 @@ function getSyncButton() {
     return value;
   }
 
+ 
   /* ======================================
      MERGE LOCAL AND CLOUD DATA
   ====================================== */
+
+  function isEmptyValue(value) {
+    if (value === null || value === undefined || value === "") {
+      return true;
+    }
+
+    if (Array.isArray(value)) {
+      return value.length === 0 ||
+        value.every(item => isEmptyValue(item));
+    }
+
+    if (typeof value === "object") {
+      const values = Object.values(value);
+
+      return values.length === 0 ||
+        values.every(item => isEmptyValue(item));
+    }
+
+    return false;
+  }
 
   function mergeArray(localArray, cloudArray) {
     const merged = new Map();
@@ -225,10 +246,12 @@ function getSyncButton() {
   function mergeItems(localItems, cloudItems) {
     const merged = new Map();
 
+    // Load cloud data first.
     (cloudItems || []).forEach(item => {
       merged.set(item.key, item.value);
     });
 
+    // Merge the current browser's local data.
     (localItems || []).forEach(item => {
       const key = item.key;
       const localValue = item.value;
@@ -240,8 +263,14 @@ function getSyncButton() {
         Array.isArray(cloudValue)
       ) {
         merged.set(key, mergeArray(localValue, cloudValue));
+      } else if (
+        isEmptyValue(localValue) &&
+        !isEmptyValue(cloudValue)
+      ) {
+        // Restore populated cloud data when local data is empty.
+        merged.set(key, cloudValue);
       } else {
-        // Preserve the current browser's copy for matching keys.
+        // Preserve populated local data.
         merged.set(key, localValue);
       }
     });
@@ -251,6 +280,7 @@ function getSyncButton() {
       value
     }));
   }
+
 
   /* ======================================
      APPLICATION STATE SYNC
