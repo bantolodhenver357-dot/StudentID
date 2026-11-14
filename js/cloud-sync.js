@@ -437,9 +437,12 @@
         );
       }
 
-      const itemCount = await syncApplicationState(user);
+      // Synchronize individual student records first.
+const recordCount = await syncStudentRecords(user);
 
-      const recordCount = await syncStudentRecords(user);
+// Then synchronize the complete application state,
+// including the latest records, photos, signatures and templates.
+const itemCount = await syncApplicationState(user);
 
       // Refresh the editor and student records.
       if (window.IDCardEditor?.restore) {
