@@ -154,12 +154,17 @@ $("resetPhotoBtn").onclick = () => {
 
 /* SIGNATURE */
 
-$("signatureUpload").onchange = event => {
+$("signatureUpload").onchange = async event => {
   const file = event.target.files[0];
 
-  if (file) {
-    IDCardEditor.addSignature(file);
+  if (!file) return;
+
+  try {
+    await IDCardEditor.addSignature(file);
     toast("Signature added.");
+  } catch (error) {
+    console.error(error);
+    toast("Unable to load the signature.");
   }
 };
 
@@ -438,7 +443,128 @@ document.querySelectorAll(".modal-backdrop").forEach(modal => {
   });
 });
 
-/* STUDENT RECORDS */
+/* ==========================================
+   STUDENT RECORD IMAGE HELPERS
+========================================== */
+
+// Convert an image element into a data URL for storage.
+function imageElementToData(image) {
+  return new Promise((resolve, reject) => {
+    try {
+      const canvas = document.createElement("canvas");
+
+      canvas.width = image.naturalWidth || image.width;
+      canvas.height = image.naturalHeight || image.height;
+
+      if (!canvas.width || !canvas.height) {
+        reject(new Error("Invalid image dimensions."));
+        return;
+      }
+
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0);
+
+      resolve(canvas.toDataURL("image/png"));
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// Convert a stored data URL back into an image element.
+function dataToImage(data) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(
+      new Error("Unable to restore a student image.")
+    );
+
+    image.src = data;
+  });
+}
+
+// Save the current student's individual photo and signatures.
+async function exportRecordImages() {
+  const state = IDCardEditor.state;
+  const result = {};
+
+  for (const side of ["front", "back"]) {
+    for (const layer of state.layers[side] || []) {
+      const image = state.images[layer.id];
+
+      if (!image) continue;
+
+      result[layer.id] = await imageElementToData(image);
+    }
+  }
+
+  return result;
+}
+
+// Restore a student's individual images when loading their record.
+async function importRecordImages(record) {
+  const state = IDCardEditor.state;
+  const images = record.images || {};
+
+  // Old records did not contain individual image data.
+  // Keep their existing legacy photo behavior.
+  if (!record.images) {
+    IDCardEditor.draw();
+    return;
+  }
+
+  state.images = {};
+
+  const savedSignatureImages = {};
+
+  for (const [layerId, data] of Object.entries(images)) {
+    try {
+      const image = await dataToImage(data);
+
+      state.images[layerId] = image;
+
+      const layer = [
+        ...(state.layers.front || []),
+        ...(state.layers.back || [])
+      ].find(item => item.id === layerId);
+
+      if (layer?.type === "signature") {
+        savedSignatureImages[layerId] = data;
+      }
+
+      if (layer?.type === "photo") {
+        state.photoBase = image;
+        state.photo = image;
+
+        await IDB.put("photo", data);
+      }
+
+    } catch (error) {
+      console.error(
+        "Unable to restore image for layer:",
+        layerId,
+        error
+      );
+    }
+  }
+
+  // Preserve other existing signature images from the library
+  // only when they belong to the loaded record.
+  await IDB.put("layer-images", savedSignatureImages);
+
+  if (!images || !Object.keys(images).length) {
+    state.photoBase = null;
+    state.photo = null;
+  }
+
+  IDCardEditor.draw();
+}
+
+/* ==========================================
+   STUDENT RECORDS
+========================================== */
 
 let records = [];
 
@@ -490,22 +616,38 @@ function renderRecords() {
     load.className = "btn btn-quiet";
     load.textContent = "Load";
 
-    load.onclick = () => {
-      IDCardEditor.importLayers(record.layers);
+    load.onclick = async () => {
+      try {
+        IDCardEditor.importLayers(record.layers);
 
-      $("studentName").value = record.name || "";
-      $("course").value = record.course || "";
-      $("studentNumber").value = record.number || "";
-      $("schoolYear").value = record.year || "";
-      $("birthdate").value = record.birthdate || "";
-      $("contact").value = record.contact || "";
-      $("address").value = record.address || "";
-      $("emergency").value = record.emergency || "";
+        $("studentName").value = record.name || "";
+        $("course").value = record.course || "";
+        $("studentNumber").value = record.number || "";
+        $("schoolYear").value = record.year || "";
+        $("birthdate").value = record.birthdate || "";
+        $("contact").value = record.contact || "";
+        $("address").value = record.address || "";
+        $("emergency").value = record.emergency || "";
 
-      syncStudentDetails();
-      showView("designer");
+        await importRecordImages(record);
 
-      toast("Student record loaded.");
+        syncStudentDetails();
+        showView("designer");
+
+        $("photoTools").classList.toggle(
+          "hidden",
+          !record.images ||
+          !Object.keys(record.images).length
+        );
+
+        refreshProperties();
+
+        toast("Student record loaded.");
+
+      } catch (error) {
+        console.error(error);
+        toast("Unable to load this student record.");
+      }
     };
 
     const del = document.createElement("button");
@@ -539,33 +681,48 @@ $("saveRecordBtn").onclick = async () => {
     return;
   }
 
-  const record = {
-    id: Date.now(),
-    name,
-    course: $("course").value,
-    number: $("studentNumber").value,
-    year: $("schoolYear").value,
-    birthdate: $("birthdate").value,
-    contact: $("contact").value,
-    address: $("address").value,
-    emergency: $("emergency").value,
-    layers: IDCardEditor.exportLayerData(),
-    savedAt: new Date().toISOString()
-  };
+  try {
+    const studentImages = await exportRecordImages();
 
-  records = records.filter(item =>
-    item.number !== record.number || !record.number
-  );
+    const record = {
+      id: Date.now(),
+      name,
+      course: $("course").value,
+      number: $("studentNumber").value,
+      year: $("schoolYear").value,
+      birthdate: $("birthdate").value,
+      contact: $("contact").value,
+      address: $("address").value,
+      emergency: $("emergency").value,
+      layers: IDCardEditor.exportLayerData(),
 
-  records.unshift(record);
+      // Each record now owns its individual image data.
+      images: studentImages,
 
-  await IDB.put("records", records);
-  renderRecords();
+      savedAt: new Date().toISOString()
+    };
 
-  toast("Student ID record saved on this device.");
+    records = records.filter(item =>
+      item.number !== record.number || !record.number
+    );
+
+    records.unshift(record);
+
+    await IDB.put("records", records);
+
+    renderRecords();
+
+    toast("Student ID record saved on this device.");
+
+  } catch (error) {
+    console.error("Record save failed:", error);
+    toast("Unable to save the student record.");
+  }
 };
 
-/* TEMPLATE LIBRARY */
+/* ==========================================
+   TEMPLATE LIBRARY
+========================================== */
 
 const TEMPLATE_KEY = "saved-templates";
 
@@ -714,6 +871,7 @@ function renderTemplates() {
         refreshProperties();
 
         toast("Template loaded successfully.");
+
       } catch (error) {
         console.error(error);
         toast("Unable to load this template.");
@@ -854,21 +1012,28 @@ $("backupBtn").onclick = async () => {
     downloadBlob(blob, "school-id-maker-backup.json");
 
     toast("Backup downloaded.");
+
   } catch (error) {
     console.error(error);
     toast("Unable to create backup.");
   }
 };
 
-/* GLOBAL APP METHODS */
+/* ==========================================
+   GLOBAL APP METHODS
+========================================== */
 
 window.IDApp = {
   toast,
   downloadBlob,
-  loadRecords
+  loadRecords,
+  loadTemplates,
+  renderTemplates
 };
 
-/* INITIALIZE */
+/* ==========================================
+   INITIALIZE
+========================================== */
 
 (async () => {
   try {
