@@ -20,10 +20,11 @@
     }
   }
 
-  function getSyncButton() {
-    let button = document.getElementById("cloudSyncButton");
-    if (button) return button;
+ 
+function getSyncButton() {
+  let button = document.getElementById("cloudSyncButton");
 
+  if (!button) {
     button = document.createElement("button");
     button.id = "cloudSyncButton";
     button.type = "button";
@@ -46,11 +47,17 @@
 
     if (sidebar) sidebar.appendChild(button);
     else document.body.appendChild(button);
-
-    button.addEventListener("click", syncAll);
-
-    return button;
   }
+
+  // Attach this synchronization handler only once.
+  if (button.dataset.cloudSyncHandler !== "attached") {
+    button.addEventListener("click", syncAll);
+    button.dataset.cloudSyncHandler = "attached";
+  }
+
+  return button;
+}
+
 
   /* ======================================
      IMAGE HELPERS
