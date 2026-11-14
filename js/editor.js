@@ -24,6 +24,19 @@ const IDCardEditor = (() => {
 
   const clone = value => JSON.parse(JSON.stringify(value));
 
+  // Save signature images separately from layer settings.
+  async function saveLayerImage(id, data) {
+    const saved = await IDB.get("layer-images") || {};
+    saved[id] = data;
+    await IDB.put("layer-images", saved);
+  }
+
+  async function removeLayerImage(id) {
+    const saved = await IDB.get("layer-images") || {};
+    delete saved[id];
+    await IDB.put("layer-images", saved);
+  }
+
   const defaultLayers = () => ({
     front: [
       {
@@ -405,6 +418,17 @@ const IDCardEditor = (() => {
       }
     }
 
+    // Restore saved signature images.
+    const savedImages = await IDB.get("layer-images") || {};
+
+    for (const [id, data] of Object.entries(savedImages)) {
+      try {
+        state.images[id] = await imageFrom(data);
+      } catch (error) {
+        console.error("Could not restore saved image:", id, error);
+      }
+    }
+
     draw();
   }
 
@@ -448,8 +472,9 @@ const IDCardEditor = (() => {
     await persist();
   }
 
-  function addSignature(file) {
-    blobToData(file).then(async data => {
+  async function addSignature(file) {
+    try {
+      const data = await blobToData(file);
       const im = await imageFrom(data);
 
       const layer = {
@@ -468,10 +493,18 @@ const IDCardEditor = (() => {
       state.signature = im;
       state.selectedId = layer.id;
 
+      // Save signature image for reload and cloud sync.
+      await saveLayerImage(layer.id, data);
+
+      await persist();
+
       draw();
       window.dispatchEvent(new Event("editor-selection"));
-      await persist();
-    });
+
+    } catch (error) {
+      console.error("Signature upload failed:", error);
+      window.IDApp?.toast?.("Unable to add signature.");
+    }
   }
 
   function addText() {
@@ -543,6 +576,11 @@ const IDCardEditor = (() => {
     );
 
     delete state.images[id];
+
+    // Remove any saved image belonging to this layer.
+    removeLayerImage(id).catch(error => {
+      console.error("Could not remove saved layer image:", error);
+    });
 
     state.selectedId = null;
     draw();
