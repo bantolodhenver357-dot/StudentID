@@ -166,7 +166,7 @@
   screen.innerHTML = `
     <div class="admin-login-card">
 <div class="admin-login-logo">
-    <img src="assets/LOGOVMC.png" alt="School ID Maker Logo">
+    <img src="LOGOVMC.png" alt="School Logo">
 </div>
       <h2>VMC SCHOOL ID</h2>
 
