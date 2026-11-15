@@ -145,13 +145,14 @@
   document.head.appendChild(style);
 
   const screen = document.createElement("div");
+
   screen.id = "adminLoginScreen";
 
   screen.innerHTML = `
     <div class="admin-login-card">
       <div class="admin-login-logo">ID</div>
 
-      <h2>School ID Maker</h2>
+      <h2>VMC SCHOOL ID</h2>
 
       <p class="admin-login-subtitle">
         Administrator sign in
