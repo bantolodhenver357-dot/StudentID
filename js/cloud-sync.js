@@ -2,7 +2,7 @@
 /* ==========================================
    SCHOOL ID MAKER - FULL CLOUD SYNC
    IndexedDB + Supabase Database + Storage
-   Includes sidebar cloud storage meter.
+   Sidebar Cloud Storage Meter
 ========================================== */
 
 (() => {
@@ -10,8 +10,7 @@
   const STATE_TABLE = "app_state";
   const BUCKET = "student-id-assets";
 
-  // Supabase Free plan storage allowance.
-  // Change this if your plan's allowance changes.
+  // Configured storage allowance: 1 GB.
   const STORAGE_QUOTA = 1024 * 1024 * 1024;
 
   let syncing = false;
@@ -30,8 +29,12 @@
   }
 
   /* ======================================
-     SYNC BUTTON
+     SIDEBAR ELEMENT HELPERS
   ====================================== */
+
+  function getSidebar() {
+    return document.getElementById("sidebar");
+  }
 
   function getSyncButton() {
     let button = document.getElementById("cloudSyncButton");
@@ -45,20 +48,26 @@
       button.style.cssText = `
         display:block;
         width:calc(100% - 24px);
-        margin:8px 12px;
+        margin:12px 12px 8px;
         padding:11px 14px;
-        border:1px solid #dce3ed;
-        border-radius:9px;
-        background:#eef4ff;
-        color:#174ea6;
-        font-weight:600;
+        border:1px solid var(--border-color, rgba(127,127,127,.25));
+        border-radius:12px;
+        background:var(--sidebar-button-bg, #eef4ff);
+        color:var(--sidebar-button-color, #174ea6);
+        font-size:13px;
+        font-weight:650;
         cursor:pointer;
+        transition:opacity .2s ease, transform .2s ease;
+        box-sizing:border-box;
       `;
 
-      const sidebar = document.getElementById("sidebar");
+      const sidebar = getSidebar();
 
-      if (sidebar) sidebar.appendChild(button);
-      else document.body.appendChild(button);
+      if (sidebar) {
+        sidebar.appendChild(button);
+      } else {
+        document.body.appendChild(button);
+      }
     }
 
     if (button.dataset.cloudSyncHandler !== "attached") {
@@ -70,82 +79,151 @@
   }
 
   /* ======================================
-     SIDEBAR CLOUD STORAGE CARD
+     CLOUD STORAGE CARD
   ====================================== */
 
   function getStorageCard() {
     let card = document.getElementById("cloudStorageCard");
 
     if (!card) {
-      card = document.createElement("div");
+      card = document.createElement("section");
       card.id = "cloudStorageCard";
+    }
 
+    // Only build the card contents once.
+    // This prevents replacing the refresh button
+    // and accidentally removing its event listener.
+    if (card.dataset.designVersion !== "2") {
       card.style.cssText = `
         display:none;
-        margin:12px;
+        width:calc(100% - 24px);
+        margin:8px 12px 14px;
         padding:14px;
-        border:1px solid #dce3ed;
-        border-radius:12px;
-        background:var(--card-bg,#ffffff);
-        color:var(--text-color,#202938);
+        border:1px solid var(--sidebar-border, var(--border-color, rgba(127,127,127,.22)));
+        border-radius:14px;
+        background:var(--sidebar-card-bg, var(--card-bg, rgba(127,127,127,.055)));
+        color:var(--sidebar-text, var(--text-color, inherit));
+        font-family:inherit;
         font-size:13px;
         box-sizing:border-box;
+        overflow:hidden;
       `;
 
       card.innerHTML = `
         <div style="
           display:flex;
           align-items:center;
-          gap:8px;
-          margin-bottom:13px;
+          gap:10px;
+          margin-bottom:17px;
         ">
-          <span style="font-size:20px;">☁️</span>
+          <div style="
+            width:36px;
+            height:36px;
+            flex-shrink:0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:11px;
+            background:rgba(40,120,255,.12);
+            color:#2878ff;
+            font-size:20px;
+          ">
+            <span class="material-symbols-rounded"
+              style="font-size:21px;">
+              cloud
+            </span>
+          </div>
 
-          <strong style="flex:1;">
-            Cloud Storage
-          </strong>
+          <div style="
+            flex:1;
+            min-width:0;
+          ">
+            <div style="
+              font-size:13px;
+              font-weight:700;
+              line-height:1.4;
+            ">
+              Cloud Storage
+            </div>
+
+            <div style="
+              font-size:10px;
+              color:var(--muted-color, #8993a3);
+              margin-top:2px;
+            ">
+              Your uploaded ID assets
+            </div>
+          </div>
 
           <button
             id="cloudStorageRefresh"
             type="button"
             title="Refresh storage"
-            aria-label="Refresh storage"
+            aria-label="Refresh cloud storage"
             style="
-              width:30px;
-              height:30px;
-              border:1px solid #dce3ed;
-              border-radius:8px;
+              width:32px;
+              height:32px;
+              flex-shrink:0;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              border:1px solid var(--sidebar-border, rgba(127,127,127,.25));
+              border-radius:9px;
               background:transparent;
-              cursor:pointer;
-              font-size:17px;
               color:inherit;
+              cursor:pointer;
+              font-size:19px;
+              transition:background .2s ease;
             "
-          >↻</button>
+          >
+            <span class="material-symbols-rounded"
+              style="font-size:19px;">
+              refresh
+            </span>
+          </button>
         </div>
 
-        <div
-          id="cloudStorageAmount"
-          style="
-            font-size:22px;
-            font-weight:700;
-            margin-bottom:3px;
-            word-break:break-word;
-          "
-        >
-          Loading...
+        <div style="margin-bottom:13px;">
+          <div
+            id="cloudStorageAmount"
+            style="
+              font-size:25px;
+              font-weight:750;
+              letter-spacing:-.7px;
+              line-height:1.3;
+              word-break:break-word;
+            "
+          >
+            Loading...
+          </div>
+
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:5px;
+            margin-top:4px;
+          ">
+            <span style="
+              color:var(--muted-color, #8993a3);
+              font-size:10px;
+            ">
+              Used storage
+            </span>
+
+            <span style="
+              color:var(--muted-color, #8993a3);
+              font-size:10px;
+            ">
+              of 1 GB allowance
+            </span>
+          </div>
         </div>
 
         <div style="
-          color:#8993a3;
-          font-size:11px;
-          margin-bottom:12px;
-        ">
-          of 1 GB available
-        </div>
-
-        <div style="
-          height:8px;
-          background:#e8edf4;
+          height:7px;
+          width:100%;
+          background:var(--sidebar-progress-bg, rgba(127,127,127,.17));
           border-radius:20px;
           overflow:hidden;
         ">
@@ -156,42 +234,79 @@
               width:0%;
               background:#2878ff;
               border-radius:20px;
-              transition:width .3s ease;
+              transition:width .35s ease, background .2s ease;
             "
           ></div>
         </div>
 
-        <div
-          id="cloudStorageFiles"
-          style="
-            margin-top:10px;
-            color:#8993a3;
-            font-size:11px;
-          "
-        >
-          Checking uploaded files...
+        <div style="
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:8px;
+          margin-top:11px;
+        ">
+          <div style="
+            display:flex;
+            align-items:center;
+            gap:5px;
+            min-width:0;
+            color:var(--muted-color, #8993a3);
+            font-size:10px;
+          ">
+            <span class="material-symbols-rounded"
+              style="font-size:15px;">
+              folder
+            </span>
+
+            <span id="cloudStorageFiles">
+              Checking files...
+            </span>
+          </div>
+
+          <strong
+            id="cloudStoragePercent"
+            style="
+              flex-shrink:0;
+              font-size:10px;
+              font-weight:700;
+              color:var(--muted-color, #8993a3);
+            "
+          >
+            0%
+          </strong>
         </div>
       `;
 
-      const sidebar = document.getElementById("sidebar");
-      const syncButton = document.getElementById("cloudSyncButton");
+      const refreshButton =
+        card.querySelector("#cloudStorageRefresh");
 
-      if (sidebar) {
-        if (syncButton) {
-          syncButton.insertAdjacentElement("afterend", card);
-        } else {
-          sidebar.appendChild(card);
-        }
-      } else {
-        document.body.appendChild(card);
-      }
+      refreshButton.addEventListener(
+        "click",
+        refreshCloudStorage
+      );
 
-      card.querySelector("#cloudStorageRefresh")
-        .addEventListener("click", refreshCloudStorage);
+      card.dataset.designVersion = "2";
+    }
+
+    // Keep the storage card directly below the sync button.
+    const sidebar = getSidebar();
+    const syncButton = document.getElementById("cloudSyncButton");
+
+    if (sidebar && syncButton && syncButton.parentElement) {
+      syncButton.insertAdjacentElement("afterend", card);
+    } else if (sidebar && !sidebar.contains(card)) {
+      sidebar.appendChild(card);
+    } else if (!sidebar && !document.body.contains(card)) {
+      document.body.appendChild(card);
     }
 
     return card;
   }
+
+  /* ======================================
+     STORAGE FORMATTING
+  ====================================== */
 
   function formatStorage(bytes) {
     if (bytes < 1024) {
@@ -206,7 +321,9 @@
       return (bytes / (1024 * 1024)).toFixed(2) + " MB";
     }
 
-    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+    return (
+      bytes / (1024 * 1024 * 1024)
+    ).toFixed(2) + " GB";
   }
 
   /* ======================================
@@ -241,6 +358,7 @@
 
         totalBytes += nested.bytes;
         totalFiles += nested.files;
+
       } else {
         const size = Number(
           item.metadata?.size ??
@@ -255,7 +373,10 @@
 
     // Handle additional pages.
     if ((data || []).length === 1000) {
-      const next = await listStorageFiles(path, offset + 1000);
+      const next = await listStorageFiles(
+        path,
+        offset + 1000
+      );
 
       totalBytes += next.bytes;
       totalFiles += next.files;
@@ -281,10 +402,20 @@
 
     card.style.display = "block";
 
-    const amount = card.querySelector("#cloudStorageAmount");
-    const progress = card.querySelector("#cloudStorageProgress");
-    const files = card.querySelector("#cloudStorageFiles");
-    const refreshButton = card.querySelector("#cloudStorageRefresh");
+    const amount =
+      card.querySelector("#cloudStorageAmount");
+
+    const progress =
+      card.querySelector("#cloudStorageProgress");
+
+    const files =
+      card.querySelector("#cloudStorageFiles");
+
+    const percentLabel =
+      card.querySelector("#cloudStoragePercent");
+
+    const refreshButton =
+      card.querySelector("#cloudStorageRefresh");
 
     if (storageRefreshing) return;
 
@@ -292,9 +423,11 @@
 
     refreshButton.disabled = true;
     refreshButton.style.opacity = "0.5";
+    refreshButton.style.cursor = "wait";
 
     amount.textContent = "Loading...";
-    files.textContent = "Checking uploaded files...";
+    files.textContent = "Checking files...";
+    percentLabel.textContent = "...";
 
     try {
       const result = await listStorageFiles(user.id);
@@ -308,35 +441,54 @@
 
       progress.style.width = percent.toFixed(2) + "%";
 
+      percentLabel.textContent =
+        percent.toFixed(1) + "%";
+
       if (percent >= 90) {
         progress.style.background = "#e5484d";
+        percentLabel.style.color = "#e5484d";
       } else if (percent >= 75) {
         progress.style.background = "#e5a000";
+        percentLabel.style.color = "#e5a000";
       } else {
         progress.style.background = "#2878ff";
+        percentLabel.style.color = "#2878ff";
       }
 
       files.textContent =
-        `${result.files} uploaded files · ${percent.toFixed(1)}% used`;
+        `${result.files} uploaded files`;
 
     } catch (error) {
-      console.error("Cloud storage usage error:", error);
+      console.error(
+        "Cloud storage usage error:",
+        error
+      );
 
       amount.textContent = "Unavailable";
 
       files.textContent =
-        error.message || "Unable to check cloud storage.";
+        error.message || "Unable to check storage.";
+
+      percentLabel.textContent = "--";
+      progress.style.width = "0%";
+
     } finally {
       storageRefreshing = false;
 
       refreshButton.disabled = false;
       refreshButton.style.opacity = "1";
+      refreshButton.style.cursor = "pointer";
     }
   }
 
+  /* ======================================
+     MANUAL STORAGE REFRESH
+  ====================================== */
+
   async function refreshCloudStorage() {
     try {
-      const { data, error } = await supabaseClient.auth.getUser();
+      const { data, error } =
+        await supabaseClient.auth.getUser();
 
       if (error) throw error;
 
@@ -348,7 +500,11 @@
       await updateStorageUsage(data.user);
 
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Storage refresh error:",
+        error
+      );
+
       notify("Unable to refresh cloud storage.");
     }
   }
@@ -468,7 +624,9 @@
       const response = await fetch(data.signedUrl);
 
       if (!response.ok) {
-        throw new Error("Unable to download a stored image.");
+        throw new Error(
+          "Unable to download a stored image."
+        );
       }
 
       const blob = await response.blob();
@@ -575,12 +733,14 @@
           key,
           mergeArray(localValue, cloudValue)
         );
+
       } else if (
         isEmptyValue(localValue) &&
         !isEmptyValue(cloudValue)
       ) {
         // Restore populated cloud data if local data is empty.
         merged.set(key, cloudValue);
+
       } else {
         // Preserve populated local data.
         merged.set(key, localValue);
@@ -626,7 +786,7 @@
       cloudItems
     );
 
-    // Restore the merged items locally.
+    // Restore merged items locally.
     for (const item of mergedItems) {
       await IDB.put(item.key, item.value);
     }
@@ -696,7 +856,8 @@
   }
 
   async function syncStudentRecords(user) {
-    const localRecords = await IDB.get("records") || [];
+    const localRecords =
+      await IDB.get("records") || [];
 
     const {
       data: existingRows,
@@ -786,6 +947,7 @@
       syncing = true;
 
       button.disabled = true;
+      button.style.opacity = "0.65";
       button.textContent = "☁ Synchronizing...";
 
       const {
@@ -804,12 +966,14 @@
       }
 
       // Synchronize individual student records.
-      const recordCount = await syncStudentRecords(user);
+      const recordCount =
+        await syncStudentRecords(user);
 
       // Synchronize templates, layers, photos and artwork.
-      const itemCount = await syncApplicationState(user);
+      const itemCount =
+        await syncApplicationState(user);
 
-      // Update the sidebar storage meter.
+      // Update sidebar storage meter.
       await updateStorageUsage(user);
 
       // Refresh application screens.
@@ -844,7 +1008,24 @@
       syncing = false;
 
       button.disabled = false;
+      button.style.opacity = "1";
       button.textContent = "☁ Sync Cloud";
+    }
+  }
+
+  /* ======================================
+     AUTHENTICATION VISIBILITY
+  ====================================== */
+
+  function setCloudVisibility(isVisible) {
+    const button = getSyncButton();
+    const card = getStorageCard();
+
+    button.style.display =
+      isVisible ? "block" : "none";
+
+    if (!isVisible) {
+      card.style.display = "none";
     }
   }
 
@@ -852,30 +1033,63 @@
      INITIALIZATION
   ====================================== */
 
-  function initialize() {
+  async function initialize() {
     const button = getSyncButton();
     const storageCard = getStorageCard();
 
-    if (window.IDAuth?.isAuthenticated()) {
-      button.style.display = "block";
-      storageCard.style.display = "block";
-    } else {
-      button.style.display = "none";
-      storageCard.style.display = "none";
+    // Check existing authentication.
+    try {
+      const {
+        data,
+        error
+      } = await supabaseClient.auth.getUser();
+
+      if (error) throw error;
+
+      if (data.user) {
+        setCloudVisibility(true);
+        await updateStorageUsage(data.user);
+      } else {
+        setCloudVisibility(false);
+      }
+
+    } catch (error) {
+      console.error(
+        "Cloud initialization error:",
+        error
+      );
+
+      setCloudVisibility(false);
     }
 
-    window.addEventListener("admin-authenticated", async () => {
-      button.style.display = "block";
-      storageCard.style.display = "block";
+    // Administrator has signed in.
+    window.addEventListener(
+      "admin-authenticated",
+      async () => {
+        setCloudVisibility(true);
 
-      const { data, error } =
-        await supabaseClient.auth.getUser();
+        try {
+          const {
+            data,
+            error
+          } = await supabaseClient.auth.getUser();
 
-      if (!error && data.user) {
-        await updateStorageUsage(data.user);
+          if (error) throw error;
+
+          if (data.user) {
+            await updateStorageUsage(data.user);
+          }
+
+        } catch (error) {
+          console.error(
+            "Cloud authentication refresh error:",
+            error
+          );
+        }
       }
-    });
+    );
 
+    // Monitor sign-in and sign-out.
     supabaseClient.auth.onAuthStateChange(
       (event, session) => {
         if (event === "SIGNED_OUT" || !session) {
@@ -884,15 +1098,6 @@
         } else {
           button.style.display = "block";
           storageCard.style.display = "block";
-        }
-      }
-    );
-
-    // Load storage usage when the administrator is already signed in.
-    supabaseClient.auth.getUser().then(
-      ({ data, error }) => {
-        if (!error && data.user) {
-          updateStorageUsage(data.user);
         }
       }
     );
