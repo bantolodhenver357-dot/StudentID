@@ -139,6 +139,21 @@
         color: white;
         border-color: #344256;
       }
+      .admin-login-logo {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.admin-login-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
     }
   `;
 
@@ -150,8 +165,9 @@
 
   screen.innerHTML = `
     <div class="admin-login-card">
-      <div class="admin-login-logo">ID</div>
-
+<div class="admin-login-logo">
+    <img src="assets/logo.png" alt="School ID Maker Logo">
+</div>
       <h2>VMC SCHOOL ID</h2>
 
       <p class="admin-login-subtitle">
