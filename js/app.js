@@ -298,14 +298,30 @@ function refreshProperties() {
   const isText = layer.type === "text";
 
   $("fontSizeRow").classList.toggle("hidden", !isText);
-  $("colorRow").classList.toggle("hidden", !isText);
-  $("alignRow").classList.toggle("hidden", !isText);
+$("fontWeightRow").classList.toggle("hidden", !isText);
+$("colorRow").classList.toggle("hidden", !isText);
+$("alignRow").classList.toggle("hidden", !isText);
 
-  if (isText) {
-    $("propFont").value = layer.font || 24;
-    $("propColor").value = layer.color || "#111111";
-    $("propAlign").value = layer.align || "left";
-  }
+ if (isText) {
+  $("propFont").value = layer.font || 24;
+  $("propColor").value = layer.color || "#111111";
+  $("propAlign").value = layer.align || "left";
+
+  const oldWeights = {
+    normal: "400",
+    bold: "700",
+    bolder: "800",
+    lighter: "300"
+  };
+
+  const currentWeight = String(layer.weight ?? "400").toLowerCase();
+
+  $("propWeight").value =
+    oldWeights[currentWeight] ||
+    (["300", "400", "500", "600", "700", "800", "900"].includes(currentWeight)
+      ? currentWeight
+      : "400");
+}
 
   $("lockLayer").textContent = layer.locked
     ? "🔓 Unlock position"
@@ -348,7 +364,9 @@ function updateSelected(patch) {
 $("propFont").onchange = () => {
   updateSelected({ font: Number($("propFont").value) });
 };
-
+$("propWeight").onchange = () => {
+  updateSelected({ weight: $("propWeight").value });
+};
 $("propColor").oninput = () => {
   updateSelected({ color: $("propColor").value });
 };
