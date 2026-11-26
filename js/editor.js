@@ -639,39 +639,78 @@ const IDCardEditor = (() => {
     return output;
   }
 
-  function applyInfo(data) {
-    const front = state.layers.front;
-    const back = state.layers.back;
+ 
+function applyInfo(data) {
+  const front = state.layers.front || [];
+  const back = state.layers.back || [];
 
-    const set = (arr, name, value, placeholder = "") => {
-      const layer = arr.find(item => item.name === name);
+  // Normalize layer names to support different naming styles.
+  const normalize = value =>
+    String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
 
-      if (layer) {
-        layer.text = value && String(value).trim()
-          ? String(value).trim()
-          : placeholder;
-      }
-    };
+  const set = (layers, names, value, placeholder) => {
+    const acceptedNames = names.map(normalize);
 
-    set(front, "Student name", data.name, "STUDENT NAME");
-    set(front, "Course", data.course, "COURSE / PROGRAM");
-    set(front, "Student number", data.number, "00000");
-
-    set(back, "School year", data.year, "SCHOOL YEAR");
-    set(back, "Birthdate", data.birthdate, "Birthdate");
-    set(back, "Contact number", data.contact, "Contact No.");
-    set(back, "Address", data.address, "Address");
-
-    set(
-      back,
-      "Emergency contact",
-      data.emergency,
-      "In case of emergency please contact:"
+    const layer = layers.find(item =>
+      item.type === "text" &&
+      (
+        acceptedNames.includes(normalize(item.name)) ||
+        acceptedNames.includes(normalize(item.text))
+      )
     );
 
-    draw();
-    persist();
-  }
+    if (!layer) {
+      console.warn("ID text layer not found:", names[0]);
+      return;
+    }
+
+    layer.text = value && String(value).trim()
+      ? String(value).trim()
+      : placeholder;
+  };
+
+  // FRONT
+  set(front, ["Student name"], data.name, "STUDENT NAME");
+  set(front, ["Course"], data.course, "COURSE / PROGRAM");
+  set(front, ["Student number"], data.number, "00000");
+
+  // BACK
+  set(back, ["School year"], data.year, "SCHOOL YEAR");
+
+  set(
+    back,
+    ["Birthdate", "Birth Date", "Date of Birth", "DOB"],
+    data.birthdate,
+    "Birthdate"
+  );
+
+  set(
+    back,
+    ["Contact number", "Contact No.", "Contact", "Phone Number"],
+    data.contact,
+    "Contact No."
+  );
+
+  set(
+    back,
+    ["Address", "Home Address", "Student Address"],
+    data.address,
+    "Address"
+  );
+
+  set(
+    back,
+    ["Emergency contact"],
+    data.emergency,
+    "In case of emergency please contact:"
+  );
+
+  draw();
+  persist();
+}
+
 
   /*
    * Creates a reusable template snapshot.
