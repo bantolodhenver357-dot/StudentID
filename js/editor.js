@@ -640,76 +640,141 @@ const IDCardEditor = (() => {
   }
 
  
-function applyInfo(data) {
-  const front = state.layers.front || [];
-  const back = state.layers.back || [];
 
-  // Normalize layer names to support different naming styles.
+async function applyInfo(data) {
+  const front = state.layers.front || (state.layers.front = []);
+  const back = state.layers.back || (state.layers.back = []);
+
+  // Find an existing text layer by its label.
   const normalize = value =>
-    String(value || "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "");
+    String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
-  const set = (layers, names, value, placeholder) => {
-    const acceptedNames = names.map(normalize);
-
-    const layer = layers.find(item =>
+  function setOrCreate(layers, config, value) {
+    let layer = layers.find(item =>
       item.type === "text" &&
-      (
-        acceptedNames.includes(normalize(item.name)) ||
-        acceptedNames.includes(normalize(item.text))
+      config.names.some(name =>
+        normalize(item.name) === normalize(name)
       )
     );
 
+    // Create the field if it does not exist in the saved design.
     if (!layer) {
-      console.warn("ID text layer not found:", names[0]);
-      return;
+      layer = {
+        id: uid(),
+        type: "text",
+        name: config.name,
+        text: config.placeholder,
+        x: config.x,
+        y: config.y,
+        w: config.w,
+        h: config.h,
+        font: config.font,
+        color: config.color || "#111111",
+        align: config.align || "left",
+        weight: config.weight || "normal"
+      };
+
+      layers.push(layer);
     }
 
+    // Update the displayed student information.
     layer.text = value && String(value).trim()
       ? String(value).trim()
-      : placeholder;
-  };
+      : config.placeholder;
 
-  // FRONT
-  set(front, ["Student name"], data.name, "STUDENT NAME");
-  set(front, ["Course"], data.course, "COURSE / PROGRAM");
-  set(front, ["Student number"], data.number, "00000");
+    layer.visible = true;
+  }
 
-  // BACK
-  set(back, ["School year"], data.year, "SCHOOL YEAR");
+  // FRONT SIDE
+  setOrCreate(front, {
+    name: "Student name",
+    names: ["Student name"],
+    placeholder: "STUDENT NAME",
+    x: 318, y: 748, w: 520, h: 45,
+    font: 29, color: "#fff000",
+    align: "center", weight: "bold"
+  }, data.name);
 
-  set(
-    back,
-    ["Birthdate", "Birth Date", "Date of Birth", "DOB"],
+  setOrCreate(front, {
+    name: "Course",
+    names: ["Course", "Course / Program"],
+    placeholder: "COURSE / PROGRAM",
+    x: 318, y: 812, w: 520, h: 38,
+    font: 25, color: "#ffffff",
+    align: "center", weight: "bold"
+  }, data.course);
+
+  setOrCreate(front, {
+    name: "Student number",
+    names: ["Student number", "Student ID number"],
+    placeholder: "00000",
+    x: 318, y: 890, w: 520, h: 42,
+    font: 34, color: "#ffffff",
+    align: "center"
+  }, data.number);
+
+  // BACK SIDE
+  const backFields = [
+    {
+      name: "School year",
+      names: ["School year"],
+      placeholder: "SCHOOL YEAR",
+      x: 455, y: 78, w: 280, h: 75,
+      font: 25, align: "center", weight: "bold"
+    },
+    {
+      name: "Birthdate",
+      names: ["Birthdate", "Birth Date", "Date of Birth", "DOB"],
+      placeholder: "Birthdate",
+      x: 318, y: 160, w: 510, h: 35,
+      font: 22
+    },
+    {
+      name: "Contact number",
+      names: ["Contact number", "Contact No.", "Contact", "Phone Number"],
+      placeholder: "Contact No.",
+      x: 318, y: 220, w: 510, h: 35,
+      font: 22
+    },
+    {
+      name: "Address",
+      names: ["Address", "Home Address", "Student Address"],
+      placeholder: "Address",
+      x: 318, y: 285, w: 510, h: 65,
+      font: 21, weight: "bold"
+    },
+    {
+      name: "Emergency contact",
+      names: ["Emergency contact"],
+      placeholder: "In case of emergency please contact:",
+      x: 318, y: 575, w: 540, h: 70,
+      font: 19, align: "center"
+    }
+  ];
+
+  const values = [
+    data.year,
     data.birthdate,
-    "Birthdate"
-  );
-
-  set(
-    back,
-    ["Contact number", "Contact No.", "Contact", "Phone Number"],
     data.contact,
-    "Contact No."
-  );
-
-  set(
-    back,
-    ["Address", "Home Address", "Student Address"],
     data.address,
-    "Address"
-  );
+    data.emergency
+  ];
 
-  set(
-    back,
-    ["Emergency contact"],
-    data.emergency,
-    "In case of emergency please contact:"
-  );
+  backFields.forEach((config, index) => {
+    setOrCreate(back, config, values[index]);
+  });
+
+  state.layers.front = front;
+  state.layers.back = back;
 
   draw();
-  persist();
+  await persist();
+
+  window.dispatchEvent(new Event("editor-change"));
+
+  window.IDApp?.toast?.("Student details applied to both sides!");
 }
+
 
 
   /*
