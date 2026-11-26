@@ -520,7 +520,7 @@ const IDCardEditor = (() => {
       font: 28,
       color: "#111111",
       align: "center",
-      weight: "bold"
+      weight: "400"
     };
 
     state.layers[state.side].push(layer);
