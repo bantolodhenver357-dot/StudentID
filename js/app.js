@@ -1070,7 +1070,8 @@ window.IDApp = {
   }
 })();
 
-/* SERVICE WORKER */
+
+/* SERVICE WORKER - AUTOMATIC UPDATES */
 
 if (
   "serviceWorker" in navigator &&
@@ -1079,9 +1080,58 @@ if (
     location.hostname === "localhost"
   )
 ) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./sw.js")
-      .catch(error => console.error("Service worker:", error));
+  window.addEventListener("load", async () => {
+
+    // Check whether an older service worker already controls this page.
+    const hadController = !!navigator.serviceWorker.controller;
+
+    let refreshing = false;
+
+    // Reload automatically when an updated worker takes control.
+    if (hadController) {
+      navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        () => {
+          if (refreshing) return;
+
+          refreshing = true;
+          window.location.reload();
+        }
+      );
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.register(
+        "./sw.js",
+        { updateViaCache: "none" }
+      );
+
+      // Check for a new version immediately.
+      registration.update().catch(error => {
+        console.warn("Update check failed:", error);
+      });
+
+      // Check again every 60 seconds while the page is open.
+      setInterval(() => {
+        if (!document.hidden) {
+          registration.update().catch(error => {
+            console.warn("Update check failed:", error);
+          });
+        }
+      }, 60000);
+
+      // Check whenever the user returns to the page.
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          registration.update().catch(error => {
+            console.warn("Update check failed:", error);
+          });
+        }
+      });
+
+    } catch (error) {
+      console.error("Service worker registration failed:", error);
+    }
   });
 }
+
